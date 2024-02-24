@@ -54,13 +54,13 @@ const DashboardLayout: React.FC = () => {
         <div className="border-b font-bold px-4 py-5 text-center hidden md:block">
           Wix Board
         </div>
-        <nav className="flex flex-col gap-2">
+        <nav className="mt-4">
           {tabs.map((tab, index) => (
             <button
               key={index}
               onClick={() => setActiveTab(index)}
               className={cn(
-                "p-4 py-5 flex gap-2 items-center w-full justify-center md:justify-normal hover:text-primary transition-all",
+                "p-4 py-4 flex gap-2 items-center w-full justify-center md:justify-normal hover:text-primary transition-all ",
                 activeTab === index
                   ? "border-l-[5px] border-l-primary text-primary"
                   : ""

@@ -1,5 +1,3 @@
-"use client"
-
 import DashboardLayout from "@/components/Dashboard/DashboardLayout";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 

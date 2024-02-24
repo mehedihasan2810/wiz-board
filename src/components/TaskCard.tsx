@@ -63,7 +63,7 @@ function TaskCard({ task, deleteTask, updateTask }: Props) {
       style={style}
       {...attributes}
       {...listeners}
-      className="p-3 shadow max-h-52 cursor-grab flex flex-col gap-3 border"
+      className="p-3 shadow max-h-52 cursor-grab flex flex-col gap-3 border bg-background/40"
     >
       <div className="flex justify-between">
         <Badge className="h-min">

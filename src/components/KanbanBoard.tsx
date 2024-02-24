@@ -13,60 +13,65 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 import { generateId } from "@/lib/utils";
 import { Button } from "./ui/button";
+import ClientOnlyPortal from "./ClientOnlyPortal";
+import { useThrottledCallback } from "use-debounce";
+
+const dummyTasks: Task[] = [
+  {
+    id: 213412341234123,
+    columnId: 1,
+    content: "This task is marked as high priority so complete it ASAP",
+    priority: "high",
+  },
+  {
+    id: 4673463534456546,
+    columnId: 2,
+    content:
+      "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
+    priority: "med",
+  },
+  {
+    id: 4673463523452134,
+    columnId: 1,
+    content:
+      "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
+    priority: "med",
+  },
+  {
+    id: 4657865634456546,
+    columnId: 3,
+    content:
+      "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
+    priority: "low",
+  },
+  {
+    id: 1234512309482398,
+    columnId: 1,
+    content:
+      "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!  Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere esse explicabo aliquid! Odit et soluta vel officiis alias, distinctio rem.",
+    priority: "low",
+  },
+  {
+    id: 21341234523453415,
+    columnId: 2,
+    content: "This task is marked as high priority so complete it ASAP",
+    priority: "high",
+  },
+];
+
+const dummyColumns: Column[] = [
+  { id: 1, title: "Todo" },
+  { id: 2, title: "In Progress" },
+  { id: 3, title: "Completed" },
+];
 
 function KanbanBoard() {
-  const [columns, setColumns] = useState<Column[]>([
-    { id: 1, title: "Todo" },
-    { id: 2, title: "In Progress" },
-    { id: 3, title: "Completed" },
-  ]);
+  const [columns, setColumns] = useState<Column[]>(dummyColumns);
 
-  const [tasks, setTasks] = useState<Task[]>([
-    {
-      id: 213412341234123,
-      columnId: 1,
-      content: "This task is marked as high priority so complete it ASAP",
-      priority: "high",
-    },
-    {
-      id: 4673463534456546,
-      columnId: 2,
-      content:
-        "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
-      priority: "med",
-    },
-    {
-      id: 4673463523452134,
-      columnId: 1,
-      content:
-        "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
-      priority: "med",
-    },
-    {
-      id: 4657865634456546,
-      columnId: 3,
-      content:
-        "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!",
-      priority: "low",
-    },
-    {
-      id: 1234512309482398,
-      columnId: 1,
-      content:
-        "in repellat magnam ab tenetur amet est repellendus dolores dignissimos!  Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere esse explicabo aliquid! Odit et soluta vel officiis alias, distinctio rem.",
-      priority: "low",
-    },
-    {
-      id: 21341234523453415,
-      columnId: 2,
-      content: "This task is marked as high priority so complete it ASAP",
-      priority: "high",
-    },
-  ]);
+  const [tasks, setTasks] = useState<Task[]>(dummyTasks);
 
   useEffect(() => {
     if (localStorage.getItem("columns")) {
@@ -99,7 +104,7 @@ function KanbanBoard() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 3, // 3px kadar hareket ettir
+        distance: 3,
       },
     })
   );
@@ -230,13 +235,15 @@ function KanbanBoard() {
     }
   }
 
+  const onDragOverThrottled = useThrottledCallback(onDragOver, 300);
+
   return (
     <div className="flex overflow-x-auto overflow-y-hidden h-full w-full px-6 py-4 mb-1">
       <DndContext
         sensors={sensors}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
+        onDragOver={onDragOverThrottled}
       >
         <div className="flex gap-4">
           <div className="flex gap-4 ">
@@ -257,38 +264,39 @@ function KanbanBoard() {
           </div>
           <Button
             variant="secondary"
-            onClick={() => createNewColumn()}
+            onClick={createNewColumn}
             className="w-[350px] min-w-[350px] px-3 flex items-center gap-2 rounded-lg border bg-card text-card-foreground shadow font-bold py-[1.6rem]"
           >
             <PlusCircle className="text-textColor" />
             Add Column
           </Button>
         </div>
-        {createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <ColumnContainer
-                column={activeColumn}
-                deleteColumn={deleteColumn}
-                updateColumn={updateColumn}
-                createTask={createTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-                tasks={tasks.filter(
-                  (task) => task.columnId === activeColumn.id
-                )}
-              />
-            )}
-            {activeTask && (
-              <TaskCard
-                task={activeTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-              />
-            )}
-          </DragOverlay>,
-          document?.body
-        )}
+        {
+          <ClientOnlyPortal>
+            <DragOverlay>
+              {activeColumn && (
+                <ColumnContainer
+                  column={activeColumn}
+                  deleteColumn={deleteColumn}
+                  updateColumn={updateColumn}
+                  createTask={createTask}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                  tasks={tasks.filter(
+                    (task) => task.columnId === activeColumn.id
+                  )}
+                />
+              )}
+              {activeTask && (
+                <TaskCard
+                  task={activeTask}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                />
+              )}
+            </DragOverlay>
+          </ClientOnlyPortal>
+        }
       </DndContext>
     </div>
   );

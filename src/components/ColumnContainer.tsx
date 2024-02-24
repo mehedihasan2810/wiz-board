@@ -60,6 +60,7 @@ const ColumnContainer: FC<Props> = ({
   if (isDragging) {
     return <Card ref={setNodeRef} style={style} className="w-[350px] h-full" />;
   }
+// console.log("foooo")
 
   return (
     <Card
