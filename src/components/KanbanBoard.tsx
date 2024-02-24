@@ -287,7 +287,7 @@ function KanbanBoard() {
               />
             )}
           </DragOverlay>,
-          document.body
+          document?.body
         )}
       </DndContext>
     </div>
